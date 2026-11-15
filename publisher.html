@@ -1,0 +1,187 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Data Publisher · Display &amp; Requirement</title>
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#fbfcff;--surface:#fff;--surface2:#eef1f9;--ink:#0c1a3a;--muted:#59658a;--line:#dce2f0;--accent:#0c1a3a;--accent-ink:#fff;--red:#d4202f;--ok:#1c3f9e;--ok-bg:#e8ecf8;--miss:#c4161c;--miss-bg:#fdecee;
+ --f-ui:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;--f-code:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#080f26;--surface:#101a3a;--surface2:#17234a;--ink:#eaf0ff;--muted:#9aa8cf;--line:#243260;--accent:#8aa4ff;--accent-ink:#07102b;--red:#ff5a68;--ok:#9db6ff;--ok-bg:#17285a;--miss:#ff7480;--miss-bg:#3a1620;color-scheme:dark}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:0 40px}
+.wrap{max-width:720px;margin-inline:auto}
+button,input{font:inherit;color:inherit}
+header{display:flex;align-items:center;gap:14px;padding-block:14px 10px}
+.logo{height:52px;background:#fffefe;border-radius:8px;padding:2px 6px;display:block}
+.hero{background:linear-gradient(120deg,#0a1431,#16275a);color:#fff;border-radius:18px;border-left:5px solid var(--red);padding:16px 18px;margin-bottom:14px}
+.hero .eb{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:#ff7d89;font-weight:600}
+.hero h1{margin:4px 0 0;font-size:1.25rem;text-transform:uppercase;letter-spacing:.02em}
+.hero p{margin:6px 0 0;font-size:.88rem;color:#c9d3f2}
+.stack{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+h2{margin:0;font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.88rem;font-weight:600}
+input[type=text],input[type=password]{width:100%;min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:8px 12px}
+.btn{min-height:50px;border-radius:12px;border:1.5px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:700;padding:0 18px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.msg{border-radius:10px;padding:10px 12px;background:var(--surface2);overflow-wrap:anywhere;font-size:.92rem;white-space:pre-line}
+.msg:empty{display:none}.msg.ok{background:var(--ok-bg);color:var(--ok);font-weight:600}.msg.err{background:var(--miss-bg);color:var(--miss);font-weight:600}
+ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}.muted{color:var(--muted)}.small{font-size:.86rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:var(--surface2);border-radius:10px;padding:8px;text-align:center}.stat b{display:block;font-size:1.3rem;font-variant-numeric:tabular-nums}.stat span{font-size:.75rem;color:var(--muted)}
+</style></head><body>
+<div class="wrap">
+<header><img class="logo" src="logo.png" alt="Sailor"><div class="small muted">Admin only · do not share this page with staff</div></header>
+<section class="hero"><div class="eb">Sailor Retail Control Panel</div><h1>Data Publisher</h1><p>Turn today's stock report and the sales report into one encrypted <b>data.dat</b>. Upload it to GitHub and every employee's Display &amp; Requirement app updates itself.</p></section>
+<main class="stack">
+  <section class="card">
+    <h2>1. Choose the report file(s)</h2>
+    <p class="small muted" style="margin:0">One workbook with both sheets (<b>Stock Data</b> + <b>Sales Data</b>), or two separate files: select both together.</p>
+    <input type="file" id="f" multiple accept=".xlsx,.xls,.xlsb,.csv">
+    <div class="msg" id="m1" role="status"></div>
+    <div class="stats" id="stats" hidden>
+      <div class="stat"><b id="sSku">0</b><span>SKU rows</span></div>
+      <div class="stat"><b id="sPcs">0</b><span>pieces in stock</span></div>
+      <div class="stat"><b id="sSold">0</b><span>pieces sold</span></div>
+    </div>
+  </section>
+  <section class="card" id="step2" hidden>
+    <h2>2. Name and access code</h2>
+    <label class="f">Report name shown in the app<input type="text" id="label" autocomplete="off"></label>
+    <label class="f">Access code (same code employees already use)<input type="password" id="code" autocomplete="new-password" autocapitalize="off" spellcheck="false"></label>
+    <label class="f">Repeat the access code<input type="password" id="code2" autocomplete="new-password" autocapitalize="off" spellcheck="false"></label>
+    <p class="small muted" style="margin:0">If you change the code, every employee has to enter the new code once.</p>
+    <button class="btn red" id="go" type="button">Create data.dat</button>
+    <div class="msg" id="m2" role="status"></div>
+    <a class="btn" id="dl" hidden>Download data.dat</a>
+  </section>
+  <section class="card">
+    <h2>3. Publish on GitHub</h2>
+    <ol class="small">
+      <li>Save <b>data.dat</b>. If the browser named it <b>data (1).dat</b>, rename it to exactly <b>data.dat</b>.</li>
+      <li>Open the app's GitHub repository → <b>Add file → Upload files</b> → drop <b>data.dat</b> → <b>Commit changes</b>. It replaces yesterday's file.</li>
+      <li>Wait 1–2 minutes. Staff open the app as usual; it picks up the new data by itself.</li>
+    </ol>
+  </section>
+</main></div>
+<script src="lib/xlsx.full.min.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const normH=s=>String(s==null?"":s).toUpperCase().replace(/[_\.]+/g," ").replace(/\s+/g," ").trim();
+const ST={barcode:["BARCODE","BAR CODE"],style:["STYLE CODE","STYLE NAME","STYLE"],colour:["COLOUR","COLOR"],size:["SIZE"],master:["MASTER CATEGORY","MASTER CAT"],category:["CATEGORY"],label:["LABEL"],gender:["GENDER"],season:["SEASON","A02"],balance:["BALANCE","STOCK","CLOSING STOCK"],mrp:["MRP"]};
+const SA={barcode:["BARCODE","BAR CODE"],date:["INVOICE DATE","DATE","INV DATE"],sqty:["SQTY","SALE QTY","SALES QTY"],rqty:["RQTY","RETURN QTY"],exg:["EXG QTY","EXCHANGE QTY","EXG"],style:["STYLE NAME","STYLE CODE"],colour:["COLOR","COLOUR"],size:["SIZE"],master:["MASTER CATEGORY"],category:["CATEGORY"],label:["LABEL"],gender:["GENDER"],mrp:["MRP"]};
+const GENDERS=new Set(["MENS","WOMENS","BOYS","GIRLS","UNISEX","OTHERS","KIDS","NEWBORN BOYS","NEWBORN GIRLS"]);
+function mapH(row,A){const idx={};row.forEach((h,i)=>{const n=normH(h);for(const k in A){if(idx[k]===undefined&&A[k].includes(n))idx[k]=i}});return idx}
+const setM=(id,t,c)=>{const e=$(id);e.textContent=t;e.className="msg"+(c?" "+c:"")};
+const readBuf=f=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsArrayBuffer(f)});
+const num=v=>{const n=Number(String(v==null?"":v).replace(/,/g,""));return isFinite(n)?n:0};
+const str=v=>String(v==null?"":v).trim();
+function toDay(v){
+  if(v instanceof Date&&!isNaN(v))return Date.UTC(v.getFullYear(),v.getMonth(),v.getDate())/864e5;
+  if(typeof v==="number"&&v>20000&&v<80000)return Math.floor(v)-25569;
+  const s=str(v);if(!s)return null;
+  let m=s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if(m){let y=+m[3];if(y<100)y+=2000;return Date.UTC(y,+m[2]-1,+m[1])/864e5}
+  const d=new Date(s);return isNaN(d)?null:Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5;
+}
+const isoDay=d=>new Date(d*864e5).toISOString().slice(0,10);
+let P=null;
+$("f").onchange=async e=>{
+  const files=[...e.target.files];if(!files.length)return;
+  $("step2").hidden=true;$("stats").hidden=true;$("dl").hidden=true;P=null;
+  setM("m1","Reading "+files.map(f=>f.name).join(", ")+" … this can take up to a minute.");
+  await new Promise(r=>setTimeout(r,60));
+  try{
+    let stock=null,sales=null;
+    for(const f of files){
+      const wb=XLSX.read(new Uint8Array(await readBuf(f)),{type:"array",cellDates:false,cellFormula:false,cellHTML:false,cellStyles:false});
+      for(const name of wb.SheetNames){
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:"",blankrows:false,raw:true});
+        for(let i=0;i<Math.min(rows.length,30);i++){
+          const a=mapH(rows[i],ST),b=mapH(rows[i],SA);
+          if(!stock&&a.balance!==undefined&&a.style!==undefined&&a.size!==undefined){stock={name,rows,hr:i,idx:a};break}
+          if(!sales&&b.date!==undefined&&b.sqty!==undefined&&b.barcode!==undefined){sales={name,rows,hr:i,idx:b};break}
+        }
+      }
+    }
+    if(!stock){setM("m1","Stock sheet not found. It needs columns STYLE CODE, COLOUR, SIZE, BALANCE (plus MASTER CATEGORY, CATEGORY, GENDER, LABEL, A02/SEASON, MRP, BARCODE).","err");return}
+    const need=["barcode","colour","master","category","season","mrp"].filter(k=>stock.idx[k]===undefined);
+    if(need.length){setM("m1","Stock sheet is missing columns: "+need.map(k=>ST[k][0]).join(", "),"err");return}
+    // dictionaries
+    const L={st:[],co:[],g:[],b:[],m:[],c:[],se:[],z:[]},M={};for(const k in L)M[k]=new Map();
+    const ix=(k,v)=>{v=v||"N/A";let i=M[k].get(v);if(i===undefined){i=L[k].length;L[k].push(v);M[k].set(v,i)}return i};
+    const all=[];const byBc=new Map(),runs=new Map(); // runs: every size the style was received in (all colours)
+    const g=(r,k)=>stock.idx[k]===undefined?"":r[stock.idx[k]];
+    for(let i=stock.hr+1;i<stock.rows.length;i++){
+      const r=stock.rows[i],st=str(g(r,"style"));if(!st)continue;
+      const o={bc:str(g(r,"barcode")).toUpperCase(),st,co:str(g(r,"colour"))||"N/A",g:str(g(r,"gender"))||"OTHERS",b:str(g(r,"label"))||"OTHERS",m:str(g(r,"master"))||"OTHERS",c:str(g(r,"category"))||"OTHERS",se:str(g(r,"season"))||"N/A",z:str(g(r,"size"))||"N/A",bal:num(g(r,"balance")),mrp:num(g(r,"mrp")),sold:new Map()};
+      all.push(o);if(o.bc)byBc.set(o.bc,o);
+      if(o.z!=="N/A"){let z=runs.get(st);if(!z)runs.set(st,z=new Set());z.add(o.z)}
+    }
+    let d0=null,d1=null,soldPcs=0,extra=0;
+    if(sales){
+      const h=(r,k)=>sales.idx[k]===undefined?"":r[sales.idx[k]];
+      for(let i=sales.hr+1;i<sales.rows.length;i++){
+        const r=sales.rows[i],bc=str(h(r,"barcode")).toUpperCase();if(!bc)continue;
+        const day=toDay(h(r,"date"));if(day==null)continue;
+        const q=num(h(r,"sqty"))-num(h(r,"rqty"))-num(h(r,"exg"));if(!q)continue;
+        let o=byBc.get(bc);
+        if(!o){ // sold item missing in stock report: build it from the sales row
+          const gv=str(h(r,"gender")).toUpperCase(),lv=str(h(r,"label")).toUpperCase();
+          const gen=GENDERS.has(lv)?lv:GENDERS.has(gv)?gv:(lv||"OTHERS"),brand=GENDERS.has(lv)?gv:lv;
+          o={bc,st:str(h(r,"style")),co:str(h(r,"colour"))||"N/A",g:gen,b:brand||"OTHERS",m:str(h(r,"master"))||"OTHERS",c:str(h(r,"category"))||"OTHERS",se:"N/A",z:str(h(r,"size"))||"N/A",bal:0,mrp:num(h(r,"mrp")),sold:new Map()};
+          if(!o.st)continue;all.push(o);byBc.set(bc,o);extra++;
+        }
+        o.sold.set(day,(o.sold.get(day)||0)+q);soldPcs+=q;
+        if(d0===null||day<d0)d0=day;if(d1===null||day>d1)d1=day;
+      }
+    }
+    // keep only style-colours that have stock now or were sold in the period (all their sizes kept, so the size run is known)
+    const keep=new Set();for(const o of all)if(o.bal>0||o.sold.size)keep.add(o.st+"\u0001"+o.co);
+    // row: [style,colour,gender,label,master,category,season,size,balance,mrp]  sales: [rowIndex, dayFromStart, netQty]
+    const R=[],S=[],BC=[];let pcs=0;const pos=new Map();
+    for(const o of all){
+      const k=o.st+"\u0001"+o.co;if(!keep.has(k))continue;
+      const dk=k+"\u0001"+o.z,bal=Math.max(0,o.bal);pcs+=bal;
+      let n=pos.get(dk);
+      if(n===undefined){n=R.length;pos.set(dk,n);R.push([ix("st",o.st),ix("co",o.co),ix("g",o.g),ix("b",o.b),ix("m",o.m),ix("c",o.c),ix("se",o.se),ix("z",o.z),bal,o.mrp]);BC.push(o.bc)}
+      else{R[n][8]+=bal;if(!R[n][9])R[n][9]=o.mrp;if(o.bc)BC[n]=BC[n]?BC[n]+","+o.bc:o.bc} // same size under another barcode: merge
+      for(const [d,q] of o.sold)S.push([n,d-d0,q]);
+    }
+    const sr={};for(const [st,zs] of runs){const i=M.st.get(st);if(i!==undefined)sr[i]=[...zs].map(z=>ix("z",z))}
+    P={v:2,L,r:R,s:S,sr,bc:BC,d0:d0==null?null:isoDay(d0),d1:d1==null?null:isoDay(d1),days:d0==null?0:d1-d0+1};
+    $("sSku").textContent=R.length.toLocaleString("en-US");$("sPcs").textContent=pcs.toLocaleString("en-US");$("sSold").textContent=soldPcs.toLocaleString("en-US");$("stats").hidden=false;
+    let msg="Stock sheet \""+stock.name+"\" read.";
+    msg+=sales?"\nSales sheet \""+sales.name+"\" read: "+P.d0+" to "+P.d1+" ("+P.days+" days)."+(extra?" "+extra+" sold barcodes were not in the stock report and were added with 0 stock.":""):"\nNo sales sheet found: the Requirement list will be empty. Add the sales file to fix this.";
+    setM("m1",msg,sales?"ok":"err");
+    const m=files[0].name.match(/(\d{1,2}[.\-_]\d{1,2}[.\-_]\d{2,4})/);const d=new Date();
+    $("label").value=m?m[1].replace(/[-_]/g,"."):String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear();
+    $("step2").hidden=false;setM("m2","");
+  }catch(err){console.error(err);setM("m1","Could not read the file ("+(err&&err.message||"unknown error")+"). Open it in Excel, save a copy as .xlsx and try again.","err")}
+};
+const toB64=u=>{let s="";const CH=0x8000;for(let i=0;i<u.length;i+=CH)s+=String.fromCharCode.apply(null,u.subarray(i,i+CH));return btoa(s)};
+const fromB64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function keyFor(code,salt,iter,usage){const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(code),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:iter,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,[usage])}
+$("go").onclick=async()=>{
+  const code=$("code").value,label=$("label").value.trim();
+  if(!P)return;
+  if(!window.crypto||!crypto.subtle){setM("m2","This browser cannot encrypt here. Open this page from its https link in Chrome on a computer.","err");return}
+  if(!label){setM("m2","Enter a report name.","err");return}
+  if(code.length<8){setM("m2","The access code needs at least 8 characters.","err");return}
+  if(code!==$("code2").value){setM("m2","The two access codes are different.","err");return}
+  setM("m2","Encrypting …");$("go").disabled=true;$("dl").hidden=true;
+  try{
+    await new Promise(r=>setTimeout(r,50));
+    const iter=200000,salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+    const ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},await keyFor(code,salt,iter,"encrypt"),new TextEncoder().encode(JSON.stringify(P))));
+    const file={v:2,label,updated:new Date().toISOString(),count:P.r.length,iter,salt:toB64(salt),iv:toB64(iv),data:toB64(ct)};
+    const json=JSON.stringify(file);
+    const back=JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:fromB64(file.iv)},await keyFor(code,fromB64(file.salt),iter,"decrypt"),fromB64(file.data))));
+    if(back.r.length!==P.r.length)throw new Error("verification failed");
+    const a=$("dl");a.href=URL.createObjectURL(new Blob([json],{type:"application/octet-stream"}));a.download="data.dat";a.hidden=false;
+    setM("m2","data.dat created and checked ("+(json.length/1024).toFixed(0)+" KB). Tap Download, then follow step 3.","ok");
+  }catch(err){setM("m2","Could not create the file: "+(err&&err.message||"unknown error"),"err")}
+  $("go").disabled=false;
+};
+})();
+</script></body></html>

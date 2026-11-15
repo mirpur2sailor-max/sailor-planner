@@ -1,0 +1,783 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c1a3a"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Display Planner">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png">
+<title>Display &amp; Requirement Planner</title>
+<style>
+:root{
+  --bg:#fbfcff; --surface:#ffffff; --surface2:#eef1f9; --ink:#0c1a3a; --muted:#59658a; --line:#dce2f0;
+  --accent:#0c1a3a; --accent-ink:#ffffff; --accent-soft:#e8ecf8; --red:#d4202f;
+  --miss:#c4161c; --miss-bg:#fdecee; --ok:#1c3f9e; --ok-bg:#e8ecf8; --warn:#8a5a00; --warn-bg:#fff4dc;
+  --f-ui:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-code:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#080f26; --surface:#101a3a; --surface2:#17234a; --ink:#eaf0ff; --muted:#9aa8cf; --line:#243260;
+  --accent:#8aa4ff; --accent-ink:#07102b; --accent-soft:#17285a; --red:#ff5a68;
+  --miss:#ff7480; --miss-bg:#3a1620; --ok:#9db6ff; --ok-bg:#17285a; --warn:#ffd27a; --warn-bg:#3a2e12; color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:0 96px;-webkit-text-size-adjust:100%}
+.wrap{max-width:680px;margin-inline:auto}
+button,input,select{font:inherit;color:inherit}
+h1,h2,h3{margin:0;line-height:1.25}
+.code{font-family:var(--f-code);font-size:.86em}
+.muted{color:var(--muted)} .small{font-size:.86rem} .num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px 10px}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.logo{height:56px;width:auto;flex:none;background:#fffefe;border-radius:8px;padding:2px 6px;display:block}
+.brand .eyebrow{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);line-height:1.3}
+@media (max-width:520px){.brand .eyebrow{display:none}}
+.pill{border:1px solid color-mix(in srgb,var(--red) 35%,var(--bg));background:color-mix(in srgb,var(--red) 7%,var(--surface));border-radius:12px;padding:6px 10px;text-align:right;font-size:.72rem;color:var(--red);line-height:1.35;flex:none;max-width:52%}
+.pill b{display:block;color:var(--ink);font-size:.78rem;letter-spacing:.03em;text-transform:uppercase}
+.hero{background:linear-gradient(120deg,#0a1431,#16275a);color:#fff;border-radius:18px;border-left:5px solid var(--red);padding:16px 18px;margin-bottom:14px}
+.hero .eb{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:#ff7d89;font-weight:600}
+.hero h2{font-size:1.2rem;font-weight:700;letter-spacing:.02em;text-transform:uppercase;margin-top:4px;color:#fff}
+.hero p{margin:6px 0 0;font-size:.86rem;color:#c9d3f2}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:12px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.sec-title{font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+label.f,.f{display:flex;flex-direction:column;gap:4px;font-size:.88rem;font-weight:600}
+select,input[type=password]{width:100%;min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:8px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;min-width:46px;padding:0 13px;border-radius:999px;border:1.5px solid var(--line);background:var(--bg);cursor:pointer;font-weight:600}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.sm{min-height:34px;min-width:0;padding:0 11px;font-size:.84rem}
+.chip:disabled{opacity:.35;cursor:not-allowed}
+.chip .ct{font-weight:400;opacity:.75;margin-left:4px;font-size:.8em}
+.btn{min-height:48px;border-radius:12px;border:1.5px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:700;padding:0 16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.plain{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn.red{background:var(--red);border-color:var(--red);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1 1 130px}
+.hint{font-size:.82rem;color:var(--muted);font-weight:400}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:8px 16px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+.bar .in{max-width:680px;margin-inline:auto;display:flex;gap:10px}
+.nav{flex:1;min-height:50px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;cursor:pointer}
+.nav[aria-selected=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+/* summary */
+.sum{display:flex;align-items:center;gap:12px;background:var(--accent-soft);border-radius:12px;padding:10px 12px}
+.ring{--p:0;width:72px;height:72px;border-radius:50%;flex:none;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--surface) 0);display:grid;place-items:center}
+.ring span{width:54px;height:54px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;font-weight:700;font-size:.95rem}
+.tiles{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;min-width:0}
+.tile{text-align:center;min-width:0}
+.tile b{display:block;font-size:1.35rem;line-height:1.2;font-variant-numeric:tabular-nums}
+.tile span{font-size:.74rem;color:var(--muted)}
+.tile.red b{color:var(--red)}
+/* lists */
+.brk{border-radius:12px;padding:10px 12px;background:var(--ink);color:var(--bg);display:flex;flex-direction:column;gap:2px}
+.brk b{font-size:.95rem}
+.brk .bn{font-size:.82rem;opacity:.85}
+.brk.p1{background:var(--ok);color:#fff}
+.grp{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.it{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;border-top:1px solid var(--line);min-width:0}
+.it:first-child{border-top:0}
+.it>input[type=checkbox]{width:26px;height:26px;flex:none;accent-color:var(--ok);margin-top:2px}
+.it .mid{flex:1;min-width:0}
+.it.done{opacity:.5}
+.it.done .stc{text-decoration:line-through}
+.stl{display:flex;align-items:center;gap:8px;min-width:0}
+.stc{flex:1;font-family:var(--f-code);font-weight:600;font-size:.92rem;overflow-wrap:anywhere;min-width:0}
+.co{font-weight:600;font-size:.92rem}
+.szs{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.78rem;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.szs i{font-style:normal}
+.szs i b{color:var(--ink);font-weight:600}
+.szs i.x{color:var(--miss);text-decoration:line-through}
+.meta{font-size:.74rem;color:var(--muted);margin-top:2px}
+.cp{flex:none;min-width:36px;min-height:36px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.cp svg{width:18px;height:18px;pointer-events:none}
+.cp.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.more{border:0;border-top:1px solid var(--line);width:100%;min-height:44px;background:var(--surface2);font-weight:600;cursor:pointer;color:var(--accent)}
+table.rq{width:100%;border-collapse:collapse;font-size:.84rem;margin-top:6px;font-variant-numeric:tabular-nums}
+table.rq th{font-weight:600;color:var(--muted);text-align:right;padding:3px 6px;border-bottom:1px solid var(--line);font-size:.74rem;text-transform:uppercase;letter-spacing:.04em}
+table.rq td{text-align:right;padding:4px 6px;border-bottom:1px dashed var(--line)}
+table.rq th:first-child,table.rq td:first-child{text-align:left}
+table.rq td.req{font-weight:700;color:var(--red)}
+table.rq tr.zero td{color:var(--muted)}
+table.rq td.req.z{color:var(--muted);font-weight:400}
+.empty{text-align:center;padding:28px 10px;color:var(--muted)}
+.upmsg:empty{display:none}
+.upmsg{border-radius:10px;padding:10px 12px;background:var(--surface2);overflow-wrap:anywhere;font-size:.9rem}
+.upmsg.ok{background:var(--ok-bg);color:var(--ok);font-weight:600}
+.upmsg.err{background:var(--miss-bg);color:var(--miss);font-weight:600}
+.note{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:.84rem}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;z-index:9;font-size:.9rem;max-width:calc(100% - 32px)}
+.sechead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.toggle{min-height:36px;padding:0 12px;border:1px solid var(--line);background:var(--bg);border-radius:999px;font-size:.85rem;font-weight:600;color:var(--accent);cursor:pointer;white-space:nowrap}
+.sw{display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:600;cursor:pointer}
+.sw input{width:22px;height:22px;accent-color:var(--accent)}
+/* scan */
+.secbar{display:flex;align-items:center;gap:10px;background:var(--accent-soft);border-radius:12px;padding:10px 12px}
+.secbar .t{flex:1;min-width:0;font-size:.86rem}
+.secbar .t b{display:block;font-size:.92rem;overflow-wrap:anywhere}
+.cam{position:relative;height:min(38vh,320px);min-height:220px;border-radius:var(--r);overflow:hidden;background:#000}
+.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.frame{--bc:#fff;position:absolute;left:7%;right:7%;top:28%;bottom:28%;border-radius:12px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,.38)}
+.frame .c{position:absolute;width:26px;height:26px;border:0 solid var(--bc)}
+.frame .tl{left:-2px;top:-2px;border-width:4px 0 0 4px;border-top-left-radius:12px}
+.frame .tr{right:-2px;top:-2px;border-width:4px 4px 0 0;border-top-right-radius:12px}
+.frame .bl{left:-2px;bottom:-2px;border-width:0 0 4px 4px;border-bottom-left-radius:12px}
+.frame .br{right:-2px;bottom:-2px;border-width:0 4px 4px 0;border-bottom-right-radius:12px}
+.frame .line{position:absolute;left:4%;right:4%;top:50%;height:2px;background:#ff5a68;opacity:0}
+.frame.on .line{opacity:.9;animation:sweep 1.4s ease-in-out infinite alternate}
+@keyframes sweep{from{top:8%}to{top:92%}}
+.frame.hit{--bc:#38d27a;box-shadow:0 0 0 9999px rgba(0,0,0,.38),0 0 0 3px #38d27a inset}
+.frame.hit .line{opacity:0}
+.camtools{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:8px;z-index:2}
+.round{width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-weight:700;cursor:pointer;font-size:.9rem}
+.round.on{background:#ffd23f;color:#000}
+.cammsg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:#fff;padding:16px;background:linear-gradient(120deg,#0a1431,#16275a);z-index:3}
+.cammsg p{margin:0;max-width:320px;font-size:.92rem}
+.camfps{position:absolute;left:10px;bottom:8px;color:#fff;font-size:.72rem;opacity:.75;z-index:2}
+.manual{display:flex;gap:8px}
+.manual input{flex:1;min-width:0;min-height:48px;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:8px 12px;font-family:var(--f-code);font-size:1rem}
+.verdict{border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:var(--surface);animation:pop .18s ease-out}
+@keyframes pop{from{transform:translateY(6px);opacity:.5}to{transform:none;opacity:1}}
+.vhead{padding:14px 14px 12px;color:#fff;display:flex;flex-direction:column;gap:2px}
+.vhead .vk{font-size:1.6rem;font-weight:800;letter-spacing:.04em;line-height:1.1}
+.vhead .vs{font-size:.9rem;opacity:.92}
+.vhead.disp{background:#14823f}.vhead.store{background:#c4161c}.vhead.out{background:#8a5a00}.vhead.unk{background:#59658a}
+.vbody{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:.88rem}
+.dl dt{color:var(--muted)} .dl dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.thispc{display:inline-block;border-radius:8px;background:var(--accent-soft);padding:2px 10px;font-weight:700}
+.loglist{display:flex;flex-direction:column}
+.logi{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px dashed var(--line);font-size:.86rem;min-width:0}
+.logi:first-child{border-top:0}
+.logi .lm{flex:1;min-width:0;overflow-wrap:anywhere}
+.tag{flex:none;border-radius:999px;padding:2px 10px;font-size:.74rem;font-weight:700;color:#fff}
+.tag.disp{background:#14823f}.tag.store{background:#c4161c}.tag.out{background:#8a5a00}.tag.unk{background:#59658a}
+.tiles3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tiles3 div{text-align:center;border-radius:10px;background:var(--surface2);padding:8px 4px}
+.tiles3 b{display:block;font-size:1.35rem;font-variant-numeric:tabular-nums}
+.tiles3 span{font-size:.74rem;color:var(--muted)}
+.tiles3 .g b{color:#14823f}.tiles3 .r b{color:var(--miss)}.tiles3 .o b{color:var(--warn)}
+</style></head><body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><img class="logo" alt="Sailor" src="logo.png"><div class="eyebrow">Sales &amp; Distribution<br>Display Planning</div></div>
+    <div class="pill"><b>Data</b><span id="dataInfo">Not loaded</span></div>
+  </header>
+  <section class="hero">
+    <div class="eb">Sailor Retail Control Panel</div>
+    <h2 id="heroT">Display &amp; Requirement Planner</h2>
+    <p id="heroP">Pick a section to get the <b>display list</b> (best size runs first) or the <b>requirement list</b> from recent sales.</p>
+  </section>
+
+  <main class="stack">
+    <section class="card" id="syncCard">
+      <div class="sechead"><h2 class="sec-title">Stock &amp; sales data</h2><button type="button" class="toggle" id="syncBtn">Check for update</button></div>
+      <div class="upmsg" id="syncMsg" role="status" aria-live="polite">Loading…</div>
+      <form id="codeForm" hidden autocomplete="off" style="display:flex;gap:10px">
+        <input type="password" id="codeIn" placeholder="Access code" aria-label="Access code" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" style="flex:1;min-width:0;width:auto">
+        <button class="btn" type="submit" style="flex:none">Unlock</button>
+      </form>
+    </section>
+
+    <section class="card" id="filterCard" hidden>
+      <h2 class="sec-title">Choose the section</h2>
+      <label class="f">Gender<select id="fG"></select></label>
+      <label class="f">Master Category<select id="fM"></select></label>
+      <label class="f">Category<select id="fC"></select></label>
+      <div class="f"><span>Season <span class="hint">(select one or more · none = all)</span></span><div class="chips" id="fSe" style="margin-top:4px"></div></div>
+
+      <!-- display-only -->
+      <div class="f" id="dSizeWrap"><span>Sizes that must be in stock <span class="hint">· untick a size to also list styles missing it</span></span><div class="chips" id="fDs" style="margin-top:4px"></div><div class="hint" id="dSizeHint"></div></div>
+
+      <!-- requirement-only -->
+      <div id="rWrap" class="stack" hidden style="gap:12px">
+        <div class="f"><span>Sales period <span class="hint" id="perHint"></span></span><div class="chips" id="fPer" style="margin-top:4px"></div></div>
+        <div class="f"><span>Cover stock for <span class="hint">(requirement = average daily sale × days − current stock)</span></span><div class="chips" id="fCov" style="margin-top:4px"></div></div>
+        <div class="f"><span>Sizes</span><div class="chips" id="fRs" style="margin-top:4px"></div></div>
+        <label class="sw"><input type="checkbox" id="onlyNeed" checked> Show only items that need stock</label>
+      </div>
+
+      <div class="sum" id="sum">
+        <div class="ring" id="ring"><span id="ringTxt">0%</span></div>
+        <div class="tiles">
+          <div class="tile"><b id="tSty">0</b><span>Styles</span></div>
+          <div class="tile"><b id="tCol">0</b><span>Colours</span></div>
+          <div class="tile" id="t3"><b id="tPcs">0</b><span id="t3l">Pieces</span></div>
+        </div>
+      </div>
+      <div class="hint num" id="sumHint"></div>
+    </section>
+
+    <div class="row" id="dTools" hidden>
+      <button class="btn plain" id="copyAll">Copy style codes</button>
+      <button class="btn plain" id="clearTicks">Clear ticks</button>
+    </div>
+    <div class="row" id="rTools" hidden>
+      <button class="btn" id="xlsBtn">⬇ Excel</button>
+      <button class="btn red" id="pdfBtn">⬇ PDF</button>
+    </div>
+    <div class="stack" id="list"></div>
+
+    <div class="stack" id="scanView" hidden>
+      <div class="secbar"><div class="t"><span class="muted">Scanning against</span><b id="scSec"></b><span class="muted" id="scSec2"></span></div><button class="toggle" id="scChange" type="button">Change</button></div>
+      <div class="cam" id="cam">
+        <video id="video" playsinline muted autoplay></video>
+        <div class="frame" id="frame"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i><span class="line"></span></div>
+        <div class="camtools"><button class="round" id="btnTorch" type="button" hidden aria-label="Flashlight">💡</button><button class="round" id="btnZoom" type="button" hidden aria-label="Zoom">1×</button><button class="round" id="btnCam" type="button" hidden aria-label="Switch camera">⟳</button></div>
+        <div class="camfps" id="camInfo"></div>
+        <div class="cammsg" id="camMsg"><p id="camText">Point the camera at the barcode. Hold the phone 10–20 cm away so the barcode fills the box.</p><button class="btn red" id="btnStart" type="button">📷 Start scanning</button></div>
+      </div>
+      <div id="verdict"></div>
+      <div class="row">
+        <button class="btn plain" id="btnStop" type="button" hidden>■ Stop camera</button>
+        <label class="btn plain" style="cursor:pointer">🖼 Scan from photo<input type="file" id="photoIn" accept="image/*" capture="environment" hidden></label>
+      </div>
+      <form class="manual" id="manual" autocomplete="off"><input id="manualIn" type="search" inputmode="text" enterkeyhint="search" autocapitalize="characters" spellcheck="false" placeholder="Type or scan barcode (e.g. A211143)" aria-label="Barcode"><button class="btn" type="submit">Check</button></form>
+      <section class="card">
+        <div class="sechead"><h2 class="sec-title">This scanning session</h2><button class="toggle" id="scClear" type="button">Clear</button></div>
+        <div class="tiles3"><div class="g"><b id="cDisp">0</b><span>Display</span></div><div class="r"><b id="cStore">0</b><span>Keep in store</span></div><div class="o"><b id="cOut">0</b><span>Other section</span></div></div>
+        <div class="loglist" id="scLog"></div>
+        <label class="sw"><input type="checkbox" id="autoTick" checked> Tick "Display" items in the display list automatically</label>
+        <label class="sw"><input type="checkbox" id="beepChk" checked> Beep and vibrate on scan</label>
+      </section>
+    </div>
+  </main>
+</div>
+<div class="bar" id="bar" hidden><div class="in">
+  <button class="nav" data-v="display" aria-selected="true">Display</button>
+  <button class="nav" data-v="scan" aria-selected="false">Scan</button>
+  <button class="nav" data-v="req" aria-selected="false">Requirement</button>
+</div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="lib/xlsx.mini.min.js" defer></script>
+<script src="lib/jspdf.umd.min.js" defer></script>
+<script src="lib/jspdf.plugin.autotable.min.js" defer></script>
+<script src="lib/zxing-reader.js" defer></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>Number(n).toLocaleString("en-US");
+let toastT;function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>e.hidden=true,1800)}
+const COPY_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
+
+/* ---------- sizes ---------- */
+const SIZE_ORDER=["NB","0-3M","3 M","3-6M","6 M","6-9M","9 M","12 M","M (80CM)","S (60CM)","1Y","2Y","3Y","4Y","5Y","6Y","2-3Y","3-4Y","3-6Y","4-5Y","5-6Y","6-7Y","7-8Y","9-10Y","11-12Y","13-14Y","XXS","XS","S","M","L","XL","XXL","3XL","XXXL","4XL","5XL"];
+function sizeRank(s){const i=SIZE_ORDER.indexOf(s);if(i>=0)return[0,i,""];const n=parseFloat(s);if(!isNaN(n)&&/^[\d.\/]+$/.test(s))return[1,n,s];return[2,0,s]}
+const cmpSize=(a,b)=>{const x=sizeRank(a),y=sizeRank(b);return x[0]-y[0]||x[1]-y[1]||String(x[2]).localeCompare(y[2])};
+// sizes that sell less, so a style missing them is still a good display (lower = less important)
+const LOW_DEMAND={"XXL":1,"3XL":1,"XXXL":1,"4XL":1,"5XL":1,"S":2,"XS":3,"XXS":3};
+const lowRank=z=>LOW_DEMAND[z]||10;
+
+/* ---------- data ---------- */
+let DB=null;
+function buildDB(P,label){
+  const L=P.L,SR=P.sr||{},rows=P.r.map(a=>({si:a[0],st:L.st[a[0]],co:L.co[a[1]],g:L.g[a[2]],b:L.b[a[3]],m:L.m[a[4]],c:L.c[a[5]],se:L.se[a[6]],z:L.z[a[7]],n:a[8],p:a[9],sales:[]}));
+  for(const s of P.s)rows[s[0]].sales.push([s[1],s[2]]);
+  const byBc=new Map();(P.bc||[]).forEach((b,i)=>{if(b)String(b).split(",").forEach(x=>{x=x.trim().toUpperCase();if(x)byBc.set(x,rows[i])})});
+  const sc=new Map();
+  for(const r of rows){const k=r.st+"\u0001"+r.co;let o=sc.get(k);if(!o){o={k,st:r.st,co:r.co,g:r.g,b:r.b,m:r.m,c:r.c,se:r.se,p:r.p,rows:[]};sc.set(k,o)}o.rows.push(r);r.o=o;if(!o.p&&r.p)o.p=r.p}
+  for(const o of sc.values()){
+    o.rows.sort((a,b)=>cmpSize(a.z,b.z));o.n=o.rows.reduce((s,r)=>s+r.n,0);
+    // size run = every size this style was received in (any colour), so a colour that only came in M/L is not "complete"
+    const run=new Set(o.rows.map(r=>r.z));(SR[o.rows[0].si]||[]).forEach(i=>run.add(L.z[i]));
+    o.run=[...run].sort(cmpSize);
+  }
+  DB={rows,sc:[...sc.values()],byBc,days:P.days||0,d0:P.d0,d1:P.d1,label};
+  $("dataInfo").textContent=label+(P.d1?" · sales to "+fmtD(P.d1):"");
+}
+const fmtD=iso=>{try{return new Date(iso+"T00:00:00Z").toLocaleDateString("en-GB",{day:"2-digit",month:"short",timeZone:"UTC"})}catch(e){return iso}};
+const fmtT=iso=>{try{return new Date(iso).toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}catch(e){return iso}};
+
+/* ---------- encrypted data.dat ---------- */
+const b64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function decryptFile(f,code){
+  const km=await crypto.subtle.importKey("raw",new TextEncoder().encode(code),"PBKDF2",false,["deriveKey"]);
+  const key=await crypto.subtle.deriveKey({name:"PBKDF2",salt:b64(f.salt),iterations:f.iter,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["decrypt"]);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:b64(f.iv)},key,b64(f.data))));
+}
+function setSync(t,c){const m=$("syncMsg");m.textContent=t;m.className="upmsg"+(c?" "+c:"")}
+let pending=null,loadedVer=null,syncing=false,lastSync=0;
+async function sync(manual){
+  if(syncing)return;syncing=true;
+  try{
+    let f=null;
+    try{const r=await fetch("data.dat",{cache:"no-cache"});if(r.ok){const j=await r.json();if(j&&j.data)f=j}}catch(e){}
+    lastSync=Date.now();
+    if(!f){if(!DB)setSync("Could not load the data file. Check the internet connection and tap Check for update.","err");else if(manual)setSync("Could not check for new data. Showing "+DB.label+".");return}
+    if(loadedVer===f.updated){if(manual)setSync("Up to date: "+f.label+" (published "+fmtT(f.updated)+").","ok");return}
+    const code=LS.get("dr.code");
+    if(!code){pending=f;$("codeForm").hidden=false;setSync("Enter the access code to open "+f.label+".");return}
+    await useFile(f,code,!!loadedVer);
+  }finally{syncing=false}
+}
+async function useFile(f,code,isUpdate){
+  setSync("Opening "+f.label+" …");
+  try{
+    const P=await decryptFile(f,code);
+    LS.set("dr.code",code);pending=null;$("codeForm").hidden=true;$("codeIn").value="";
+    buildDB(P,f.label);loadedVer=f.updated;
+    setSync((isUpdate?"New data loaded: ":"Data: ")+f.label+" (published "+fmtT(f.updated)+").","ok");
+    $("bar").hidden=false;
+    renderFilters(true);
+    if(isUpdate)toast("New data loaded");
+  }catch(e){LS.del("dr.code");pending=f;$("codeForm").hidden=false;setSync("The access code did not work. Enter it again.","err")}
+}
+$("codeForm").onsubmit=e=>{e.preventDefault();const c=$("codeIn").value.trim();if(c&&pending)useFile(pending,c,!!loadedVer)};
+$("syncBtn").onclick=()=>sync(true);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&Date.now()-lastSync>10*60*1000)sync(false)});
+
+/* ---------- state ---------- */
+const S=Object.assign({view:"display",g:"",m:"",c:"",se:[],per:30,cov:15,onlyNeed:true},LS.get("dr.state")||{});
+S.se=new Set(S.se||[]);
+const dSizes=new Set(),rSizes=new Set();let sizeList=[];
+const ticks=new Set(LS.get("dr.ticks")||[]);
+const saveState=()=>LS.set("dr.state",{view:S.view,g:S.g,m:S.m,c:S.c,se:[...S.se],per:S.per,cov:S.cov,onlyNeed:S.onlyNeed});
+const saveTicks=()=>LS.set("dr.ticks",[...ticks]);
+
+function opts(sel,vals,cur,allLabel){
+  sel.innerHTML='<option value="">'+allLabel+'</option>'+vals.map(v=>'<option'+(v===cur?' selected':'')+'>'+esc(v)+'</option>').join("");
+  if(cur&&!vals.includes(cur))sel.value="";
+  return sel.value;
+}
+const byStock=(list,key)=>{const m=new Map();for(const o of list)m.set(o[key],(m.get(o[key])||0)+o.n);return[...m.entries()].sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(b[0]))};
+const relevant=o=>o.n>0||o.rows.some(r=>r.sales.length);
+
+function renderFilters(reset){
+  if(!DB)return;
+  const all=DB.sc.filter(relevant);
+  const gl=[...new Set(all.map(o=>o.g))].sort();
+  S.g=opts($("fG"),gl,S.g,"All genders");
+  const a1=all.filter(o=>!S.g||o.g===S.g);
+  S.m=opts($("fM"),[...new Set(a1.map(o=>o.m))].sort(),S.m,"All master categories");
+  const a2=a1.filter(o=>!S.m||o.m===S.m);
+  S.c=opts($("fC"),[...new Set(a2.map(o=>o.c))].sort(),S.c,"All categories");
+  const a3=a2.filter(o=>!S.c||o.c===S.c);
+  // seasons with stock count
+  const ses=byStock(a3,"se");for(const s of [...S.se])if(!ses.some(x=>x[0]===s))S.se.delete(s);
+  $("fSe").innerHTML='<button type="button" class="chip sm" data-se="" aria-pressed="'+(S.se.size===0)+'">All</button>'+ses.map(([s,n])=>'<button type="button" class="chip sm" data-se="'+esc(s)+'" aria-pressed="'+S.se.has(s)+'">'+esc(s)+'<span class="ct">'+fmt(n)+'</span></button>').join("");
+  const a4=a3.filter(o=>!S.se.size||S.se.has(o.se));
+  // sizes in this section
+  const zs=new Set();for(const o of a4)for(const z of o.run)zs.add(z);
+  const nl=[...zs].sort(cmpSize);
+  if(reset||nl.join("|")!==sizeList.join("|")){sizeList=nl;dSizes.clear();rSizes.clear();nl.forEach(z=>{dSizes.add(z);rSizes.add(z)})}
+  sizeChips("fDs",dSizes);sizeChips("fRs",rSizes);
+  // period chips
+  const maxD=Math.max(DB.days,0);const pers=[10,20,30,40,50,60];
+  if(S.per>maxD&&maxD)S.per=pers.filter(p=>p<=maxD).pop()||maxD;
+  $("fPer").innerHTML=pers.map(p=>'<button type="button" class="chip sm" data-per="'+p+'" aria-pressed="'+(S.per===p)+'"'+(p>maxD+9?' disabled':'')+'>'+p+' days</button>').join("");
+  $("perHint").textContent=DB.days?"(data: "+fmtD(DB.d0)+" – "+fmtD(DB.d1)+", "+DB.days+" days)":"(no sales data)";
+  $("fCov").innerHTML=[7,15,30,45].map(c=>'<button type="button" class="chip sm" data-cov="'+c+'" aria-pressed="'+(S.cov===c)+'">'+c+' days</button>').join("");
+  $("onlyNeed").checked=S.onlyNeed;
+  SEC=a4;render();
+}
+function sizeChips(id,set){
+  const allOn=sizeList.length&&sizeList.every(z=>set.has(z));
+  $(id).innerHTML='<button type="button" class="chip sm" data-z="*" aria-pressed="'+allOn+'">All</button>'+sizeList.map(z=>'<button type="button" class="chip sm" data-z="'+esc(z)+'" aria-pressed="'+set.has(z)+'">'+esc(z)+'</button>').join("");
+}
+let SEC=[];
+$("fG").onchange=e=>{S.g=e.target.value;S.m=S.c="";S.se.clear();saveState();renderFilters(true)};
+$("fM").onchange=e=>{S.m=e.target.value;S.c="";S.se.clear();saveState();renderFilters(true)};
+$("fC").onchange=e=>{S.c=e.target.value;S.se.clear();saveState();renderFilters(true)};
+$("fSe").onclick=e=>{const b=e.target.closest("[data-se]");if(!b)return;const s=b.dataset.se;if(!s)S.se.clear();else S.se.has(s)?S.se.delete(s):S.se.add(s);saveState();renderFilters(false)};
+function sizeClick(set){return e=>{const b=e.target.closest("[data-z]");if(!b)return;const z=b.dataset.z;
+  if(z==="*")sizeList.forEach(x=>set.add(x));
+  else set.has(z)?set.delete(z):set.add(z);
+  sizeChips(e.currentTarget.id,set);render()}}
+$("fDs").onclick=sizeClick(dSizes);$("fRs").onclick=sizeClick(rSizes);
+$("fPer").onclick=e=>{const b=e.target.closest("[data-per]");if(!b||b.disabled)return;S.per=+b.dataset.per;saveState();renderFilters(false)};
+$("fCov").onclick=e=>{const b=e.target.closest("[data-cov]");if(!b)return;S.cov=+b.dataset.cov;saveState();renderFilters(false)};
+$("onlyNeed").onchange=e=>{S.onlyNeed=e.target.checked;saveState();render()};
+document.querySelectorAll(".nav").forEach(b=>b.onclick=()=>{S.view=b.dataset.v;saveState();render();window.scrollTo({top:0})});
+
+function secTitle(){return[S.g,S.m,S.c].filter(Boolean).join(" › ")||"All products"}
+function render(){
+  document.querySelectorAll(".nav").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===S.view));
+  const d=S.view==="display",sc=S.view==="scan";
+  $("filterCard").hidden=sc||!DB;document.querySelector(".hero").hidden=sc;$("syncCard").hidden=sc&&!!DB;$("list").hidden=sc;$("scanView").hidden=!sc;
+  $("dSizeWrap").hidden=!d;$("rWrap").hidden=S.view!=="req";$("dTools").hidden=!d;$("rTools").hidden=S.view!=="req";
+  $("heroT").textContent=d?"Display list":sc?"Display scanner":"Requirement list";
+  $("heroP").innerHTML=d?"Style-colours in stock for this section, <b>full size runs first</b>, then runs missing low-selling sizes. Tick each one once it is on display.":sc?"Scan any product from the store. The app tells you at once whether it goes <b>on display</b> or stays <b>in the store</b>, based on the section you chose.":"Items that sold well in the chosen period, with the <b>quantity to request</b> so the outlet holds enough stock.";
+  if(!sc)Scan.stop();
+  d?renderDisplay():sc?renderScan():renderReq();
+}
+
+/* ---------- DISPLAY ---------- */
+let D=null;
+function computeDisplay(){
+  // sales share per size in this section (to order equal-priority groups)
+  const share=new Map();let tot=0;
+  for(const o of SEC)for(const r of o.rows)for(const s of r.sales){share.set(r.z,(share.get(r.z)||0)+s[1]);tot+=s[1]}
+  const sh=z=>tot?(share.get(z)||0)/tot:0;
+  const groups=new Map();
+  for(const o of SEC){
+    if(o.n<=0)continue;
+    const avail=o.rows.filter(r=>r.n>0).map(r=>r.z),run=o.run;
+    const miss=run.filter(z=>!avail.includes(z));
+    if(miss.some(z=>dSizes.has(z)))continue;         // a required size is out of stock
+    if(!avail.some(z=>dSizes.has(z))&&dSizes.size)continue; // nothing of the chosen sizes
+    const key=miss.join("|");let g=groups.get(key);
+    if(!g){g={miss,items:[],w:[miss.length,miss.reduce((s,z)=>s+lowRank(z),0),miss.reduce((s,z)=>s+sh(z),0)]};groups.set(key,g)}
+    g.items.push(o);
+  }
+  const G=[...groups.values()].sort((a,b)=>a.w[0]-b.w[0]||a.w[1]-b.w[1]||a.w[2]-b.w[2]);
+  G.forEach(g=>g.items.sort((a,b)=>b.n-a.n||a.st.localeCompare(b.st)));
+  D={G,shown:new Map(),pri:new Map()};G.forEach((g,gi)=>g.items.forEach(o=>D.pri.set(o.k,gi+1)));
+  return{share,tot};
+}
+function renderDisplay(){
+  const {share,tot}=computeDisplay();
+  const lows=[...share.entries()].sort((a,b)=>a[1]-b[1]).slice(0,2).map(x=>x[0]);
+  $("dSizeHint").textContent=dSizes.size===sizeList.length?"Showing only complete size runs. Untick a size (e.g. XXL) to add styles missing it.":(tot&&lows.length?"Lowest-selling sizes here: "+lows.join(", ")+".":"");
+  drawDisplay();
+}
+function drawDisplay(){
+  const L=$("list");
+  if(!D.G.length){L.innerHTML='<div class="empty">No style-colour in this section has all the chosen sizes in stock.<br>Untick a size above to widen the list.</div>';updSum();return}
+  L.innerHTML=D.G.map((g,gi)=>{
+    const pr=gi+1,lim=D.shown.get(gi)||60,its=g.items.slice(0,lim);
+    const t=g.miss.length?"All sizes except "+g.miss.join(", "):"All sizes in stock";
+    const bn=pr===1?"Show these first":"From here: priority "+pr+" – "+(g.miss.length===1?g.miss[0]+" size is not in stock":g.miss.join(" & ")+" sizes are not in stock");
+    return '<div class="brk'+(pr===1?' p1':'')+'"><b>Priority '+pr+' · '+esc(t)+' · '+g.items.length+'</b><span class="bn">'+esc(bn)+'</span></div>'+
+    '<div class="grp">'+its.map(o=>itemHTML(o)).join("")+(g.items.length>lim?'<button class="more" data-more="'+gi+'">Show '+Math.min(60,g.items.length-lim)+' more of '+(g.items.length-lim)+'</button>':'')+'</div>';
+  }).join("");
+  updSum();
+}
+function itemHTML(o){
+  const done=ticks.has(o.k);
+  const q=new Map(o.rows.map(r=>[r.z,r.n]));
+  const szs=o.run.map(z=>q.get(z)>0?'<i>'+esc(z)+' <b>'+fmt(q.get(z))+'</b></i>':'<i class="x">'+esc(z)+'</i>').join("");
+  return '<div class="it'+(done?' done':'')+'"><input type="checkbox" data-k="'+esc(o.k)+'"'+(done?' checked':'')+' aria-label="On display">'+
+  '<div class="mid"><div class="stl"><span class="stc">'+esc(o.st)+'</span><button class="cp" data-cp="'+esc(o.st)+'" aria-label="Copy style code">'+COPY_SVG+'</button></div>'+
+  '<div class="co">'+esc(o.co)+'</div><div class="szs">'+szs+'</div><div class="meta">'+esc(o.c)+' · '+esc(o.se)+(o.p?' · Tk '+fmt(o.p):'')+' · '+fmt(o.n)+' pcs</div></div></div>';
+}
+function updSum(){
+  if(S.view==="display"){
+    const its=D.G.flatMap(g=>g.items),st=new Set(its.map(o=>o.st)),pcs=its.reduce((s,o)=>s+o.n,0),done=its.filter(o=>ticks.has(o.k)).length;
+    const p=its.length?Math.round(done*100/its.length):0;
+    $("tSty").textContent=fmt(st.size);$("tCol").textContent=fmt(its.length);$("tPcs").textContent=fmt(pcs);$("t3l").textContent="Pieces";$("t3").className="tile";
+    $("ring").hidden=false;$("ring").style.setProperty("--p",p);$("ringTxt").textContent=p+"%";
+    $("sumHint").textContent=secTitle()+" · "+fmt(done)+" of "+fmt(its.length)+" colours ticked as displayed"+(D.G.length>1?" · "+D.G.length+" priority groups":"");
+  }
+}
+$("list").addEventListener("change",e=>{const c=e.target;if(!c.dataset||!c.dataset.k)return;c.checked?ticks.add(c.dataset.k):ticks.delete(c.dataset.k);saveTicks();c.closest(".it").classList.toggle("done",c.checked);updSum()});
+$("list").addEventListener("click",e=>{
+  const cp=e.target.closest("[data-cp]");if(cp){copy(cp.dataset.cp).then(ok=>{if(ok){cp.classList.add("ok");setTimeout(()=>cp.classList.remove("ok"),1200);toast("Copied "+cp.dataset.cp)}});return}
+  const m=e.target.closest("[data-more]");if(m){const gi=+m.dataset.more;D.shown.set(gi,(D.shown.get(gi)||60)+60);drawDisplay()}
+});
+async function copy(t){try{await navigator.clipboard.writeText(t);return true}catch(e){const a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand("copy")}catch(x){}a.remove();if(!ok)toast("Copy not allowed");return ok}}
+$("copyAll").onclick=()=>{if(!D)return;const st=[...new Set(D.G.flatMap(g=>g.items).filter(o=>!ticks.has(o.k)).map(o=>o.st))];if(!st.length){toast("Nothing left to copy");return}copy(st.join("\n")).then(ok=>ok&&toast("Copied "+st.length+" style codes (not ticked)"))};
+$("clearTicks").onclick=()=>{if(!D)return;const its=D.G.flatMap(g=>g.items);its.forEach(o=>ticks.delete(o.k));saveTicks();drawDisplay();toast("Ticks cleared for this list")};
+
+/* ---------- REQUIREMENT ---------- */
+let RQ=null;
+function renderReq(){
+  const L=$("list");
+  if(!DB.days){L.innerHTML='<div class="empty">No sales data in the current file.</div>';RQ={items:[]};reqSum();return}
+  const N=Math.min(S.per,DB.days),from=DB.days-N,cov=S.cov;
+  const items=[];
+  for(const o of SEC){
+    const lines=[];let sold=0,req=0;
+    for(const r of o.rows){
+      if(!rSizes.has(r.z))continue;
+      let q=0;for(const s of r.sales)if(s[0]>=from)q+=s[1];
+      const need=q>0?Math.max(0,Math.ceil(q/N*cov)-r.n):0;
+      if(q<=0)continue;
+      lines.push({z:r.z,q,n:r.n,req:need});sold+=q;req+=need;
+    }
+    if(!lines.length)continue;
+    if(S.onlyNeed&&req<=0)continue;
+    items.push({o,lines:S.onlyNeed?lines.filter(l=>l.req>0):lines,sold,req,stock:o.rows.filter(r=>rSizes.has(r.z)).reduce((s,r)=>s+r.n,0)});
+  }
+  items.sort((a,b)=>b.sold-a.sold||b.req-a.req||a.o.st.localeCompare(b.o.st));
+  RQ={items,N,cov,shown:60};
+  drawReq();
+}
+function drawReq(){
+  const L=$("list"),it=RQ.items;
+  if(!it.length){L.innerHTML='<div class="empty">'+(S.onlyNeed?"Nothing needs stock for this section and period.":"No sales for this section in the chosen period.")+'</div>';reqSum();return}
+  const note=S.per>DB.days?'<div class="note">Only '+DB.days+' days of sales are in the file, so the list uses '+DB.days+' days.</div>':'';
+  L.innerHTML=note+'<div class="grp">'+it.slice(0,RQ.shown).map(x=>{
+    const o=x.o;
+    return '<div class="it" style="display:block"><div class="stl"><span class="stc">'+esc(o.st)+'</span><button class="cp" data-cp="'+esc(o.st)+'" aria-label="Copy style code">'+COPY_SVG+'</button></div>'+
+    '<div class="co">'+esc(o.co)+'</div><div class="meta">'+esc(o.c)+' · '+esc(o.se)+(o.p?' · Tk '+fmt(o.p):'')+' · sold '+fmt(x.sold)+' · stock '+fmt(x.stock)+'</div>'+
+    '<table class="rq"><thead><tr><th>Size</th><th>Sold '+RQ.N+'d</th><th>Stock</th><th>Need</th></tr></thead><tbody>'+
+    x.lines.map(l=>'<tr'+(l.req?'':' class="zero"')+'><td>'+esc(l.z)+'</td><td>'+fmt(l.q)+'</td><td>'+fmt(l.n)+'</td><td class="req'+(l.req?'':' z')+'">'+(l.req?fmt(l.req):'–')+'</td></tr>').join("")+
+    '</tbody></table></div>';
+  }).join("")+(it.length>RQ.shown?'<button class="more" data-rmore="1">Show '+Math.min(60,it.length-RQ.shown)+' more of '+(it.length-RQ.shown)+'</button>':'')+'</div>';
+  reqSum();
+}
+$("list").addEventListener("click",e=>{if(e.target.closest("[data-rmore]")){RQ.shown+=60;drawReq()}});
+function reqSum(){
+  const it=RQ.items,st=new Set(it.map(x=>x.o.st)),req=it.reduce((s,x)=>s+x.req,0),sold=it.reduce((s,x)=>s+x.sold,0);
+  $("ring").hidden=true;
+  $("tSty").textContent=fmt(st.size);$("tCol").textContent=fmt(it.length);$("tPcs").textContent=fmt(req);$("t3l").textContent="Pcs needed";$("t3").className="tile red";
+  $("sumHint").textContent=secTitle()+(RQ.N?" · sold "+fmt(sold)+" pcs in "+RQ.N+" days · cover "+RQ.cov+" days":"");
+  $("xlsBtn").disabled=$("pdfBtn").disabled=!it.length;
+}
+function reqRows(){
+  const out=[];let i=0;
+  for(const x of RQ.items)for(const l of x.lines){if(S.onlyNeed&&!l.req)continue;out.push([++i,x.o.st,x.o.co,x.o.m,x.o.c,x.o.se,l.z,x.o.p||0,l.q,l.n,l.req])}
+  return out;
+}
+function reqMeta(){
+  return{title:"Product Requirement List",sec:secTitle()+(S.se.size?" · Season: "+[...S.se].join(", "):""),
+    per:"Sales "+RQ.N+" days ("+fmtD(isoAdd(DB.d1,-(RQ.N-1)))+" – "+fmtD(DB.d1)+") · Stock cover "+RQ.cov+" days · Sizes: "+(rSizes.size===sizeList.length?"All":[...rSizes].sort(cmpSize).join(", ")),
+    data:"Data: "+DB.label+" · Generated "+new Date().toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})};
+}
+const isoAdd=(iso,d)=>new Date(Date.parse(iso+"T00:00:00Z")+d*864e5).toISOString().slice(0,10);
+const fileBase=()=>("Requirement_"+(S.c||S.m||S.g||"All")+"_"+RQ.N+"d_"+DB.label).replace(/[^\w.\-]+/g,"_");
+const HEAD=["SL","Style Code","Colour","Master Category","Category","Season","Size","MRP","Sold","Stock","Req. Qty"];
+$("xlsBtn").onclick=()=>{
+  if(!window.XLSX){toast("Still loading, try again");return}
+  const rows=reqRows(),m=reqMeta();
+  const tot=rows.reduce((a,r)=>[a[0]+r[8],a[1]+r[9],a[2]+r[10]],[0,0,0]);
+  const aoa=[["Sailor · "+m.title],[m.sec],[m.per],[m.data],[],HEAD.slice(0,8).concat(["Sold ("+RQ.N+"d)","Stock","Req. Qty"]),...rows,["","TOTAL","","","","","","",tot[0],tot[1],tot[2]]];
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"]=[5,24,18,16,26,18,8,8,10,8,9].map(w=>({wch:w}));
+  ws["!autofilter"]={ref:"A6:K"+(6+rows.length)};
+  ws["!merges"]=[0,1,2,3].map(r=>({s:{r,c:0},e:{r,c:10}}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Requirement");
+  XLSX.writeFile(wb,fileBase()+".xlsx");toast("Excel saved");
+};
+$("pdfBtn").onclick=()=>{
+  if(!window.jspdf){toast("Still loading, try again");return}
+  const {jsPDF}=window.jspdf,doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"}),m=reqMeta(),rows=reqRows();
+  const tot=rows.reduce((a,r)=>[a[0]+r[8],a[1]+r[9],a[2]+r[10]],[0,0,0]);
+  const W=doc.internal.pageSize.getWidth();
+  doc.setFillColor(12,26,58);doc.rect(0,0,W,22,"F");doc.setFillColor(212,32,47);doc.rect(0,22,W,1.2,"F");
+  doc.setTextColor(255,255,255);doc.setFont("helvetica","bold");doc.setFontSize(15);doc.text("SAILOR",12,10);
+  doc.setFontSize(11);doc.text(m.title,12,17);doc.setFont("helvetica","normal");doc.setFontSize(8);doc.text(m.data,W-12,17,{align:"right"});
+  doc.setTextColor(12,26,58);doc.setFontSize(9.5);doc.setFont("helvetica","bold");doc.text(m.sec,12,30,{maxWidth:W-24});
+  doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.text(m.per,12,35,{maxWidth:W-24});
+  doc.text("Styles: "+new Set(RQ.items.map(x=>x.o.st)).size+"   Colours: "+RQ.items.length+"   Sold: "+tot[0]+"   Req. Qty: "+tot[2],12,40);
+  doc.autoTable({startY:44,head:[["SL","Style Code","Colour","Category","Season","Size","MRP","Sold","Stock","Req"]],
+    body:rows.map(r=>[r[0],r[1],r[2],r[4],r[5],r[6],r[7]?r[7].toLocaleString("en-US"):"",r[8],r[9],r[10]]),
+    foot:[["","TOTAL","","","","","",tot[0],tot[1],tot[2]]],
+    styles:{fontSize:7.2,cellPadding:1.4,lineColor:[220,226,240],lineWidth:.1,textColor:[12,26,58]},
+    headStyles:{fillColor:[12,26,58],textColor:255,fontStyle:"bold"},footStyles:{fillColor:[238,241,249],textColor:[12,26,58],fontStyle:"bold"},
+    alternateRowStyles:{fillColor:[248,250,255]},
+    columnStyles:{0:{halign:"right",cellWidth:8},1:{fontStyle:"bold",cellWidth:36},6:{halign:"right"},7:{halign:"right"},8:{halign:"right"},9:{halign:"right",fontStyle:"bold",textColor:[196,22,28]}},
+    margin:{left:10,right:10},
+    didDrawPage:d=>{doc.setFontSize(7);doc.setTextColor(120);doc.text("Page "+doc.internal.getNumberOfPages(),W-10,doc.internal.pageSize.getHeight()-6,{align:"right"})}
+  });
+  doc.save(fileBase()+".pdf");toast("PDF saved");
+};
+
+/* ---------- SCAN ---------- */
+const scanLog=LS.get("dr.scanlog")||[];
+const opt=Object.assign({autoTick:true,beep:true},LS.get("dr.scanopt")||{});
+$("autoTick").checked=opt.autoTick;$("beepChk").checked=opt.beep;
+$("autoTick").onchange=e=>{opt.autoTick=e.target.checked;LS.set("dr.scanopt",opt)};
+$("beepChk").onchange=e=>{opt.beep=e.target.checked;LS.set("dr.scanopt",opt)};
+$("scChange").onclick=()=>{S.view="display";saveState();render();window.scrollTo({top:0})};
+function renderScan(){
+  computeDisplay();
+  $("scSec").textContent=secTitle();
+  const req=dSizes.size===sizeList.length?"all sizes":[...dSizes].sort(cmpSize).join(", ");
+  $("scSec2").textContent=(S.se.size?"Season: "+[...S.se].join(", ")+" · ":"")+"Must have: "+req+" · "+fmt(D.pri.size)+" colours to display";
+  drawLog();
+}
+function judge(code){
+  code=String(code||"").trim().toUpperCase();
+  const r=DB&&DB.byBc.get(code);
+  if(!r)return{code,v:"unk",k:"NOT FOUND",s:"This barcode is not in the current stock report (zero stock or not received). Keep it aside and check with the in-charge."};
+  const o=r.o,inSec=SEC.includes(o);
+  if(!D)computeDisplay();
+  const pri=D.pri.get(o.k);
+  if(!inSec)return{code,r,o,v:"out",k:"OTHER SECTION",s:"Not part of "+secTitle()+(S.se.size?" ("+[...S.se].join(", ")+")":"")+". It belongs to "+o.c+" · "+o.se+"."};
+  if(o.n<=0)return{code,r,o,v:"store",k:"KEEP IN STORE",s:"The stock report shows 0 pieces for this colour."};
+  if(pri){const g=D.G[pri-1];return{code,r,o,v:"disp",pri,k:"DISPLAY",s:"Priority "+pri+" · "+(g.miss.length?"all sizes except "+g.miss.join(", "):"all sizes in stock")}}
+  const avail=new Set(o.rows.filter(x=>x.n>0).map(x=>x.z)),need=o.run.filter(z=>dSizes.has(z)&&!avail.has(z));
+  return{code,r,o,v:"store",k:"KEEP IN STORE",s:need.length?"Size "+need.join(", ")+" not in stock, so this colour does not make the display list.":"None of the chosen sizes is in stock."};
+}
+function showVerdict(code,src){
+  const J=judge(code);
+  if(J.v==="disp"&&opt.autoTick&&!ticks.has(J.o.k)){ticks.add(J.o.k);saveTicks();J.ticked=true}
+  let body="";
+  if(J.o){
+    const o=J.o,r=J.r,q=new Map(o.rows.map(x=>[x.z,x.n]));
+    const szs=o.run.map(z=>q.get(z)>0?'<i>'+esc(z)+' <b>'+fmt(q.get(z))+'</b></i>':'<i class="x">'+esc(z)+'</i>').join("");
+    const from=Math.max(0,DB.days-30);let sold=0;for(const x of o.rows)for(const s of x.sales)if(s[0]>=from)sold+=s[1];
+    body='<div class="stl"><span class="stc" style="font-size:1.05rem">'+esc(o.st)+'</span><button class="cp" data-cp="'+esc(o.st)+'" aria-label="Copy style code">'+COPY_SVG+'</button></div>'+
+    '<div><span class="co">'+esc(o.co)+'</span> &nbsp;<span class="thispc">Size '+esc(r.z)+' · '+fmt(r.n)+' in stock</span></div>'+
+    '<div><div class="hint">Stock by size</div><div class="szs" style="font-size:.88rem">'+szs+'</div></div>'+
+    '<dl class="dl"><dt>Category</dt><dd>'+esc(o.c)+'</dd><dt>Master</dt><dd>'+esc(o.m)+'</dd><dt>Gender · Label</dt><dd>'+esc(o.g)+' · '+esc(o.b)+'</dd><dt>Season</dt><dd>'+esc(o.se)+'</dd><dt>MRP</dt><dd>'+(o.p?'Tk '+fmt(o.p):'–')+'</dd><dt>Colour stock</dt><dd>'+fmt(o.n)+' pcs</dd>'+(DB.days?'<dt>Sold (30 days)</dt><dd>'+fmt(sold)+' pcs</dd>':'')+'<dt>Barcode</dt><dd class="code">'+esc(J.code)+'</dd></dl>'+
+    (J.v==="disp"?'<div class="hint">'+(ticks.has(o.k)?"✓ Ticked as displayed in the display list.":"Not ticked yet in the display list.")+'</div>':'');
+  }else body='<div class="code">'+esc(J.code)+'</div>';
+  $("verdict").innerHTML='<div class="verdict"><div class="vhead '+J.v+'"><span class="vk">'+J.k+'</span><span class="vs">'+esc(J.s)+'</span></div><div class="vbody">'+body+'</div></div>';
+  const i=scanLog.findIndex(x=>x.code===J.code);if(i>=0)scanLog.splice(i,1);
+  scanLog.unshift({code:J.code,v:J.v,k:J.k,st:J.o?J.o.st:"",co:J.o?J.o.co:"",z:J.r?J.r.z:"",t:Date.now()});
+  if(scanLog.length>300)scanLog.length=300;LS.set("dr.scanlog",scanLog);drawLog();feedback(J.v);
+  if(src==="photo")$("verdict").scrollIntoView({behavior:"smooth",block:"start"});
+  return J;
+}
+function drawLog(){
+  const c={disp:0,store:0,out:0};scanLog.forEach(x=>{if(x.v==="disp")c.disp++;else if(x.v==="out")c.out++;else c.store++});
+  $("cDisp").textContent=c.disp;$("cStore").textContent=c.store;$("cOut").textContent=c.out;
+  const tag={disp:"Display",store:"Store",out:"Other",unk:"Not found"};
+  $("scLog").innerHTML=scanLog.length?scanLog.slice(0,40).map(x=>'<div class="logi"><span class="tag '+x.v+'">'+tag[x.v]+'</span><span class="lm"><span class="code">'+esc(x.st||x.code)+'</span>'+(x.co?' · '+esc(x.co)+' · '+esc(x.z):'')+'</span></div>').join(""):'<div class="hint">Scanned items appear here.</div>';
+}
+$("scClear").onclick=()=>{scanLog.length=0;LS.set("dr.scanlog",scanLog);drawLog();$("verdict").innerHTML=""};
+$("verdict").addEventListener("click",e=>{const cp=e.target.closest("[data-cp]");if(cp)copy(cp.dataset.cp).then(ok=>ok&&toast("Copied "+cp.dataset.cp))});
+$("manual").onsubmit=e=>{e.preventDefault();const v=$("manualIn").value.trim();if(!v)return;showVerdict(v,"manual");$("manualIn").value="";$("manualIn").focus()};
+let actx=null;
+function tone(f,ms,at){try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.type="square";o.frequency.value=f;g.gain.value=.06;o.connect(g);g.connect(actx.destination);const t=actx.currentTime+(at||0);o.start(t);o.stop(t+ms/1000)}catch(e){}}
+function feedback(v){
+  if(!opt.beep)return;
+  if(v==="disp"){tone(1320,90);tone(1760,120,.12)}else if(v==="store"){tone(330,320)}else{tone(660,140);tone(660,140,.2)}
+  try{navigator.vibrate&&navigator.vibrate(v==="disp"?[60,40,60]:v==="store"?[260]:[90,60,90])}catch(e){}
+}
+
+const Scan=(function(){
+  const V=$("video"),FR=$("frame"),CAM=$("cam");
+  const LIN=["Code128","Code39","Code93","EAN-13","EAN-8","UPC-A","UPC-E","ITF"],ALL=LIN.concat(["QRCode","DataMatrix"]);
+  // passes tried in turn on each camera frame: plain, then sharpened versions (sharpening rescues blurry, low-quality cameras)
+  const PASSES=[{sh:0},{sh:2,amt:1.5},{sh:4,amt:2,up:2},{sh:3,amt:3}];
+  const cv=document.createElement("canvas"),ctx=cv.getContext("2d",{willReadFrequently:true});
+  let stream=null,track=null,running=false,timer=0,busy=false,n=0,miss=0,native=null,wasm=false,zooms=[1],zi=0,torch=false;
+  let last="",lastT=0,pend="",pendN=0,pauseUntil=0,devs=[],decT=0;
+  function initDecoders(){
+    if(!wasm&&window.ZXingWASM){try{ZXingWASM.prepareZXingModule({overrides:{locateFile:(p,pre)=>p.endsWith(".wasm")?new URL("lib/"+p,location.href).href:pre+p},fireImmediately:true});wasm=true}catch(e){console.warn(e)}}
+    if(!native&&"BarcodeDetector" in window){
+      const want=["code_128","code_39","code_93","ean_13","ean_8","upc_a","upc_e","itf","qr_code","data_matrix"];
+      Promise.resolve(BarcodeDetector.getSupportedFormats?BarcodeDetector.getSupportedFormats():want).then(sup=>{const f=want.filter(x=>sup.includes(x));if(f.length)native=new BarcodeDetector({formats:f})}).catch(()=>{});
+    }
+  }
+  function msg(t,btn){$("camText").textContent=t;$("btnStart").hidden=btn===false;$("camMsg").hidden=false}
+  async function getStream(){
+    const saved=LS.get("dr.cam");
+    const base={width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30}};
+    const tries=[];
+    if(saved)tries.push({audio:false,video:Object.assign({deviceId:{exact:saved}},base)});
+    tries.push({audio:false,video:Object.assign({facingMode:{ideal:"environment"}},base)},{audio:false,video:{facingMode:"environment"}},{audio:false,video:true});
+    let err;
+    for(const c of tries){try{return await navigator.mediaDevices.getUserMedia(c)}catch(e){err=e;if(e&&e.name==="NotAllowedError")throw e;if(c.video.deviceId)LS.del("dr.cam")}}
+    throw err;
+  }
+  async function start(){
+    if(running)return;initDecoders();
+    try{actx=actx||new(window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume()}catch(e){}
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg("This browser cannot open the camera. Open the app link in Chrome (Android) or Safari (iPhone). You can still use Scan from photo or type the barcode.",false);return}
+    msg("Starting camera…",false);
+    try{
+      stream=await getStream();track=stream.getVideoTracks()[0];V.srcObject=stream;await V.play().catch(()=>{});
+      let caps={};try{caps=track.getCapabilities?track.getCapabilities():{}}catch(e){}
+      const adv=[];if(caps.focusMode&&caps.focusMode.includes("continuous"))adv.push({focusMode:"continuous"});
+      if(caps.exposureMode&&caps.exposureMode.includes("continuous"))adv.push({exposureMode:"continuous"});
+      if(adv.length)track.applyConstraints({advanced:adv}).catch(()=>{});
+      $("btnTorch").hidden=!caps.torch;
+      zooms=[1];if(caps.zoom){[1.5,2,3].forEach(z=>{if(z<=caps.zoom.max)zooms.push(z)})}
+      zi=0;$("btnZoom").hidden=zooms.length<2;$("btnZoom").textContent="1×";
+      try{devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput")}catch(e){devs=[]}
+      $("btnCam").hidden=devs.length<2;
+      const st=track.getSettings?track.getSettings():{};$("camInfo").textContent=(st.width&&st.height?st.width+"×"+st.height:"")+(native?" · fast reader":"")+(wasm?" · HD reader":"");
+      $("camMsg").hidden=true;$("btnStop").hidden=false;running=true;FR.classList.add("on");loop();
+    }catch(e){
+      stopTracks();let m="The camera did not start.";
+      if(e&&e.name==="NotAllowedError")m="Camera permission was not given. Allow the camera for this site in the browser or phone settings, then try again.";
+      else if(e&&e.name==="NotFoundError")m="No camera was found on this device.";
+      else if(e&&e.name==="NotReadableError")m="Another app is using the camera. Close it and try again.";
+      msg(m,true);$("btnStart").textContent="🔄 Try again";
+    }
+  }
+  function stopTracks(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;track=null;V.srcObject=null;torch=false;$("btnTorch").classList.remove("on")}
+  function stop(){if(!running&&!stream)return;running=false;clearTimeout(timer);stopTracks();FR.classList.remove("on");$("btnStop").hidden=true;msg("Camera stopped. Tap to scan again.",true);$("btnStart").textContent="📷 Start scanning"}
+  function loop(){clearTimeout(timer);if(running)timer=setTimeout(tick,decT>120?40:80)}
+  function blur1(src,w,h,r,horiz){
+    const out=new Float32Array(src.length),len=horiz?w:h,lines=horiz?h:w,st=horiz?1:w,ls=horiz?w:1,k=2*r+1;
+    for(let l=0;l<lines;l++){const o=l*ls;let sum=0;
+      for(let i=-r;i<=r;i++)sum+=src[o+Math.min(len-1,Math.max(0,i))*st];
+      for(let i=0;i<len;i++){out[o+i*st]=sum/k;sum+=src[o+Math.min(len-1,i+r+1)*st]-src[o+Math.max(0,i-r)*st]}}
+    return out;
+  }
+  function sharpen(img,r,amt){ // unsharp mask on luminance
+    const w=img.width,h=img.height,d=img.data,n=w*h,L=new Float32Array(n);
+    for(let i=0,j=0;i<n;i++,j+=4)L[i]=.299*d[j]+.587*d[j+1]+.114*d[j+2];
+    let B=blur1(L,w,h,r,true);B=blur1(B,w,h,r,false);B=blur1(B,w,h,r,true);B=blur1(B,w,h,r,false);
+    for(let i=0,j=0;i<n;i++,j+=4){let v=L[i]+amt*(L[i]-B[i]);v=v<0?0:v>255?255:v;d[j]=d[j+1]=d[j+2]=v}
+    return img;
+  }
+  function grab(full){
+    const vw=V.videoWidth,vh=V.videoHeight;if(!vw||!vh)return null;
+    let sx=0,sy=0,sw=vw,sh=vh;
+    if(!full){
+      const cr=CAM.getBoundingClientRect(),fr=FR.getBoundingClientRect();
+      const s=Math.max(cr.width/vw,cr.height/vh),ox=(vw*s-cr.width)/2,oy=(vh*s-cr.height)/2;
+      sx=(fr.left-cr.left+ox)/s;sy=(fr.top-cr.top+oy)/s;sw=fr.width/s;sh=fr.height/s;
+      const px=sw*.06,py=sh*.25;sx-=px;sy-=py;sw+=px*2;sh+=py*2;
+      sx=Math.max(0,sx);sy=Math.max(0,sy);sw=Math.min(vw-sx,sw);sh=Math.min(vh-sy,sh);
+    }
+    const sc=Math.min(1,(full?1280:1600)/sw);
+    cv.width=Math.round(sw*sc);cv.height=Math.round(sh*sc);
+    ctx.imageSmoothingQuality="high";ctx.drawImage(V,sx,sy,sw,sh,0,0,cv.width,cv.height);return cv;
+  }
+  async function wasmRead(img,formats,hard){
+    try{const r=await ZXingWASM.readBarcodes(img,{formats,tryHarder:true,tryRotate:true,tryInvert:false,tryDenoise:!!hard,maxNumberOfSymbols:1,downscaleThreshold:hard?2000:500});
+      const ok=r.find(x=>x.isValid&&x.text);return ok?ok.text:null}catch(e){return null}
+  }
+  // one pass on a canvas: native reader (Android) on plain frames, HD reader on plain or sharpened frames
+  async function decode(c,pass,formats){
+    if(!pass.sh&&native){try{const r=await native.detect(c);if(r&&r.length)return r[0].rawValue}catch(e){}}
+    if(!wasm)return null;
+    let src=c;
+    if(pass.up&&c.width<1100){src=document.createElement("canvas");src.width=c.width*pass.up;src.height=c.height*pass.up;const x=src.getContext("2d");x.imageSmoothingQuality="high";x.drawImage(c,0,0,src.width,src.height)}
+    const img=src.getContext("2d",{willReadFrequently:true}).getImageData(0,0,src.width,src.height);
+    if(pass.sh)sharpen(img,pass.up&&src===c?Math.max(1,Math.round(pass.sh/pass.up)):pass.sh,pass.amt);
+    return wasmRead(img,formats||LIN,false);
+  }
+  async function tick(){
+    if(!running||busy||V.readyState<2||Date.now()<pauseUntil){loop();return}
+    busy=true;n++;const t0=performance.now();
+    const full=n%7===0,c=grab(full);let txt=null;
+    if(c)txt=await decode(c,full?PASSES[0]:PASSES[n%PASSES.length]);
+    decT=performance.now()-t0;busy=false;
+    if(txt){miss=0;got(String(txt).trim())}else miss++;
+    loop();
+  }
+  function got(code){
+    const up=code.toUpperCase(),now=Date.now();
+    if(up===last&&now-lastT<3000){lastT=now;return}
+    const known=DB&&DB.byBc.has(up);
+    if(!known){if(pend===up)pendN++;else{pend=up;pendN=1}if(pendN<2)return} // unknown code: need two equal reads
+    pend="";pendN=0;last=up;lastT=now;pauseUntil=now+900;
+    FR.classList.remove("on");FR.classList.add("hit");setTimeout(()=>{FR.classList.remove("hit");if(running)FR.classList.add("on")},800);
+    showVerdict(up,"cam");
+  }
+  async function photo(file){
+    initDecoders();
+    toast("Reading photo…");
+    try{
+      const bmp=await (window.createImageBitmap?createImageBitmap(file):new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file)}));
+      const W=bmp.width,H=bmp.height,tries=[2400,1600,1000];let txt=null;
+      for(const m of tries){
+        const s=Math.min(1,m/Math.max(W,H)),c=document.createElement("canvas");c.width=Math.round(W*s);c.height=Math.round(H*s);
+        c.getContext("2d",{willReadFrequently:true}).drawImage(bmp,0,0,c.width,c.height);
+        if(!wasm&&!native){await new Promise(r=>setTimeout(r,300));initDecoders()}
+        for(const ps of PASSES){txt=await decode(c,ps,ALL);if(txt)break}
+        if(!txt){const img=c.getContext("2d",{willReadFrequently:true}).getImageData(0,0,c.width,c.height);txt=await wasmRead(img,ALL,true)}
+        if(txt)break;
+      }
+      if(txt)showVerdict(String(txt).trim(),"photo");else toast("No barcode found. Take the photo closer, in good light, barcode flat and sharp.");
+    }catch(e){toast("Could not read the photo")}
+  }
+  $("btnStart").onclick=start;$("btnStop").onclick=stop;
+  $("btnTorch").onclick=()=>{if(!track)return;torch=!torch;track.applyConstraints({advanced:[{torch}]}).then(()=>$("btnTorch").classList.toggle("on",torch)).catch(()=>{torch=false;toast("Flashlight is not available on this phone")})};
+  $("btnZoom").onclick=()=>{if(!track)return;zi=(zi+1)%zooms.length;const z=zooms[zi];track.applyConstraints({advanced:[{zoom:z}]}).then(()=>$("btnZoom").textContent=z+"×").catch(()=>{})};
+  $("btnCam").onclick=async()=>{
+    if(!devs.length)return;const cur=track&&track.getSettings?track.getSettings().deviceId:"";
+    const i=devs.findIndex(d=>d.deviceId===cur),nx=devs[(i+1)%devs.length];LS.set("dr.cam",nx.deviceId);
+    running=false;clearTimeout(timer);stopTracks();await start();toast(nx.label||"Camera switched");
+  };
+  $("photoIn").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)photo(f)};
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")stop()});
+  return{start,stop};
+})();
+
+/* ---------- start ---------- */
+sync(false);
+if("serviceWorker" in navigator&&location.protocol==="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+})();
+</script></body></html>

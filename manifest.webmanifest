@@ -1,0 +1,16 @@
+{
+ "name": "Display & Requirement Planner",
+ "short_name": "Display Planner",
+ "description": "Display priority list and sales-based requirement list for the outlet.",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#0c1a3a",
+ "theme_color": "#0c1a3a",
+ "icons": [
+  {"src": "icon-192.png","sizes": "192x192","type": "image/png","purpose": "any"},
+  {"src": "icon-512.png","sizes": "512x512","type": "image/png","purpose": "any"},
+  {"src": "icon-maskable-512.png","sizes": "512x512","type": "image/png","purpose": "maskable"}
+ ]
+}
