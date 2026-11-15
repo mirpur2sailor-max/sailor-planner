@@ -1,4 +1,4 @@
-const CACHE="drp-v2";
+const CACHE="drp-v3";
 const FILES=["./","index.html","manifest.webmanifest","logo.png","icon-192.png","icon-512.png","icon-maskable-512.png","apple-touch-icon.png","lib/xlsx.mini.min.js","lib/jspdf.umd.min.js","lib/jspdf.plugin.autotable.min.js","lib/zxing-reader.js","lib/zxing_reader.wasm"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!==CACHE).map(n=>caches.delete(n)))).then(()=>self.clients.claim()))});

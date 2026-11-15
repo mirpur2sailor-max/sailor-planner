@@ -110,6 +110,16 @@ table.rq td.req.z{color:var(--muted);font-weight:400}
 .toggle{min-height:36px;padding:0 12px;border:1px solid var(--line);background:var(--bg);border-radius:999px;font-size:.85rem;font-weight:600;color:var(--accent);cursor:pointer;white-space:nowrap}
 .sw{display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:600;cursor:pointer}
 .sw input{width:22px;height:22px;accent-color:var(--accent)}
+.lhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.more-sw{display:inline-flex;align-items:center;gap:8px;font-size:.84rem;font-weight:600;color:var(--muted);cursor:pointer;flex:none;user-select:none}
+.more-sw[hidden]{display:none!important}
+.more-sw input{position:absolute;opacity:0;width:1px;height:1px}
+.more-sw .trk{width:46px;height:26px;border-radius:999px;background:var(--line);position:relative;transition:background .15s}
+.more-sw .trk::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.more-sw input:checked+.trk{background:#2f6bff}
+.more-sw input:checked+.trk::after{transform:translateX(20px)}
+.more-sw input:focus-visible+.trk{outline:3px solid var(--accent);outline-offset:2px}
+.chips.clip{max-height:84px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
 /* scan */
 .secbar{display:flex;align-items:center;gap:10px;background:var(--accent-soft);border-radius:12px;padding:10px 12px}
 .secbar .t{flex:1;min-width:0;font-size:.86rem}
@@ -183,16 +193,16 @@ table.rq td.req.z{color:var(--muted);font-weight:400}
       <label class="f">Gender<select id="fG"></select></label>
       <label class="f">Master Category<select id="fM"></select></label>
       <label class="f">Category<select id="fC"></select></label>
-      <div class="f"><span>Season <span class="hint">(select one or more · none = all)</span></span><div class="chips" id="fSe" style="margin-top:4px"></div></div>
+      <div class="f"><div class="lhead"><span>Season <span class="hint">(select one or more · none = all)</span></span><label class="more-sw" data-for="fSe" hidden><span class="ml">More</span><input type="checkbox" data-more-for="fSe"><span class="trk"></span></label></div><div class="chips" id="fSe" style="margin-top:4px"></div></div>
 
       <!-- display-only -->
-      <div class="f" id="dSizeWrap"><span>Sizes that must be in stock <span class="hint">· untick a size to also list styles missing it</span></span><div class="chips" id="fDs" style="margin-top:4px"></div><div class="hint" id="dSizeHint"></div></div>
+      <div class="f" id="dSizeWrap"><div class="lhead"><span>Sizes that must be in stock <span class="hint">· untick a size to also list styles missing it</span></span><label class="more-sw" data-for="fDs" hidden><span class="ml">More</span><input type="checkbox" data-more-for="fDs"><span class="trk"></span></label></div><div class="chips" id="fDs" style="margin-top:4px"></div><div class="hint" id="dSizeHint"></div></div>
 
       <!-- requirement-only -->
       <div id="rWrap" class="stack" hidden style="gap:12px">
         <div class="f"><span>Sales period <span class="hint" id="perHint"></span></span><div class="chips" id="fPer" style="margin-top:4px"></div></div>
         <div class="f"><span>Cover stock for <span class="hint">(requirement = average daily sale × days − current stock)</span></span><div class="chips" id="fCov" style="margin-top:4px"></div></div>
-        <div class="f"><span>Sizes</span><div class="chips" id="fRs" style="margin-top:4px"></div></div>
+        <div class="f"><div class="lhead"><span>Sizes</span><label class="more-sw" data-for="fRs" hidden><span class="ml">More</span><input type="checkbox" data-more-for="fRs"><span class="trk"></span></label></div><div class="chips" id="fRs" style="margin-top:4px"></div></div>
         <label class="sw"><input type="checkbox" id="onlyNeed" checked> Show only items that need stock</label>
       </div>
 
@@ -345,6 +355,20 @@ function opts(sel,vals,cur,allLabel){
 const byStock=(list,key)=>{const m=new Map();for(const o of list)m.set(o[key],(m.get(o[key])||0)+o.n);return[...m.entries()].sort((a,b)=>b[1]-a[1]||String(a[0]).localeCompare(b[0]))};
 const relevant=o=>o.n>0||o.rows.some(r=>r.sales.length);
 
+const MORE={fSe:false,fDs:false,fRs:false};let moreCat=null;
+function updMore(){
+  if(moreCat!==S.c){moreCat=S.c;const on=!!S.c;for(const k in MORE)MORE[k]=on} // a category is chosen: open everything
+  for(const k in MORE){
+    const el=$(k),sw=document.querySelector('.more-sw[data-for="'+k+'"]');if(!el||!sw)continue;
+    el.classList.remove("clip");
+    const visible=el.offsetParent!==null,over=el.scrollHeight>96;
+    sw.hidden=visible?!over:sw.hidden;
+    sw.querySelector("input").checked=MORE[k];sw.querySelector(".ml").textContent=MORE[k]?"Less":"More";
+    if(over&&!MORE[k])el.classList.add("clip");
+  }
+}
+document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.moreFor;if(!k)return;MORE[k]=e.target.checked;updMore()});
+window.addEventListener("resize",()=>{if(DB)updMore()});
 function renderFilters(reset){
   if(!DB)return;
   const all=DB.sc.filter(relevant);
@@ -357,6 +381,7 @@ function renderFilters(reset){
   const a3=a2.filter(o=>!S.c||o.c===S.c);
   // seasons with stock count
   const ses=byStock(a3,"se");for(const s of [...S.se])if(!ses.some(x=>x[0]===s))S.se.delete(s);
+  ses.sort((a,b)=>(S.se.has(b[0])-S.se.has(a[0])));
   $("fSe").innerHTML='<button type="button" class="chip sm" data-se="" aria-pressed="'+(S.se.size===0)+'">All</button>'+ses.map(([s,n])=>'<button type="button" class="chip sm" data-se="'+esc(s)+'" aria-pressed="'+S.se.has(s)+'">'+esc(s)+'<span class="ct">'+fmt(n)+'</span></button>').join("");
   const a4=a3.filter(o=>!S.se.size||S.se.has(o.se));
   // sizes in this section
@@ -402,6 +427,7 @@ function render(){
   $("heroP").innerHTML=d?"Style-colours in stock for this section, <b>full size runs first</b>, then runs missing low-selling sizes. Tick each one once it is on display.":sc?"Scan any product from the store. The app tells you at once whether it goes <b>on display</b> or stays <b>in the store</b>, based on the section you chose.":"Items that sold well in the chosen period, with the <b>quantity to request</b> so the outlet holds enough stock.";
   if(!sc)Scan.stop();
   d?renderDisplay():sc?renderScan():renderReq();
+  updMore();
 }
 
 /* ---------- DISPLAY ---------- */
